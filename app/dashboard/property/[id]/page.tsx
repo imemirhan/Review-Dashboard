@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import useAdminAuth from '@/hooks/useAdminAuth';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, CheckCircle, XCircle } from 'lucide-react';
+import useAdminAuth from '@/hooks/useAdminAuth';
 
 type Review = {
   id: number;
@@ -24,6 +24,7 @@ export default function DashboardPropertyPage() {
   const router = useRouter();
   const listingName = decodeURIComponent(params.id as string);
 
+  // Fetch reviews for this listing
   useEffect(() => {
     fetch('/api/reviews/hostaway')
       .then((res) => res.json())
@@ -32,10 +33,18 @@ export default function DashboardPropertyPage() {
       });
   }, [listingName]);
 
-  const handleToggle = (id: number) => {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, approved: !r.approved } : r))
+  const handleToggle = async (id: number) => {
+    const updated = reviews.map((r) =>
+      r.id === id ? { ...r, approved: !r.approved } : r
     );
+    setReviews(updated);
+
+    const toggled = updated.find((r) => r.id === id);
+    await fetch('/api/reviews/hostaway', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([{ id, approved: toggled?.approved }]),
+    });
   };
 
   const handleSave = async () => {
@@ -51,21 +60,25 @@ export default function DashboardPropertyPage() {
   };
 
   return (
-    <main className="p-8 bg-gray-50 min-h-screen">
+    <main className="p-8 bg-[#f8f8f8] min-h-screen">
+      {/* Back Button */}
       <button
         onClick={() => router.push('/dashboard')}
-        className="flex items-center text-blue-600 hover:underline mb-4 text-sm"
+        className="flex items-center text-[#164f4c] hover:underline mb-6 text-sm font-medium"
       >
         <ArrowLeft size={16} className="mr-1" /> Back to Dashboard
       </button>
 
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{listingName}</h1>
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className={`px-4 py-2 rounded-md text-white font-semibold ${
-            isSaving ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+          className={`px-4 py-2 rounded-md text-white font-semibold shadow-sm transition ${
+            isSaving
+              ? 'bg-gray-400'
+              : 'bg-[#164f4c] hover:bg-[#0f3a38]'
           }`}
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
@@ -73,51 +86,62 @@ export default function DashboardPropertyPage() {
       </div>
 
       {saved && (
-        <p className="text-green-600 text-sm mb-3 font-medium">
+        <p className="text-green-600 text-sm mb-4 font-medium">
           ✅ Changes saved successfully!
         </p>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Reviews Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {reviews.map((r) => (
           <div
             key={r.id}
-            className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition"
+            className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all"
           >
-            <div className="flex justify-between">
-              <h3 className="font-semibold text-gray-800 text-lg">{r.guest}</h3>
-              <div className="flex items-center">
-                <Star
-                  className="text-yellow-500 fill-yellow-500 mr-1"
-                  size={16}
-                />
-                <span className="text-sm font-medium">{r.rating}</span>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-800">{r.guest}</h3>
+                <p className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString()}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star size={16} className="text-yellow-500 fill-yellow-500" />
+                <span className="text-sm font-medium">{r.rating.toFixed(1)}</span>
               </div>
             </div>
 
-            <p className="text-gray-700 italic text-sm mt-2">"{r.review}"</p>
+            <p className="text-gray-700 text-sm mt-3 line-clamp-4 italic">
+              “{r.review}”
+            </p>
 
-            <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
-              <span>{new Date(r.date.replace(' ', 'T')).toLocaleDateString()}</span>
-              <label className="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={r.approved}
-                  onChange={() => handleToggle(r.id)}
-                  className="accent-blue-600"
-                />
-                <span
-                  className={`font-medium ${
-                    r.approved ? 'text-green-600' : 'text-red-500'
-                  }`}
-                >
-                  {r.approved ? 'Approved' : 'Pending'}
-                </span>
-              </label>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => handleToggle(r.id)}
+                className={`flex items-center gap-1 font-medium border rounded-full px-3 py-1 transition-all ${
+                  r.approved
+                    ? 'text-green-700 border-green-400 hover:bg-green-50'
+                    : 'text-red-600 border-red-300 hover:bg-red-50'
+                }`}
+              >
+                {r.approved ? (
+                  <>
+                    <CheckCircle size={12} /> Approved
+                  </>
+                ) : (
+                  <>
+                    <XCircle size={12} /> Pending
+                  </>
+                )}
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {reviews.length === 0 && (
+        <p className="text-center text-gray-500 italic mt-10">
+          No reviews found for this property.
+        </p>
+      )}
     </main>
   );
 }
