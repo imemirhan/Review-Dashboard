@@ -1,0 +1,264 @@
+{
+  "result": [
+    {
+      "id": 1,
+      "listingName": "Cozy Apartment London",
+      "guestName": "Alice",
+      "status": "published",
+      "submittedAt": "2025-10-01",
+      "publicReview": "Great location, very clean!",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 2,
+      "listingName": "Modern Flat Berlin",
+      "guestName": "John",
+      "status": "pending",
+      "submittedAt": "2025-09-20",
+      "publicReview": "Stylish place but a bit noisy.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 3 }
+      ]
+    },
+    {
+      "id": 3,
+      "listingName": "Beachfront Villa Barcelona",
+      "guestName": "Maria",
+      "status": "pending",
+      "submittedAt": "2025-08-10",
+      "publicReview": "Loved the sea view and spacious rooms!",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 4,
+      "listingName": "Beachfront Villa Barcelona",
+      "guestName": "Luca",
+      "status": "published",
+      "submittedAt": "2025-09-01",
+      "publicReview": "Amazing location, but Wi-Fi was unstable.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 3 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 5,
+      "listingName": "Downtown Loft Paris",
+      "guestName": "Emma",
+      "status": "pending",
+      "submittedAt": "2025-07-15",
+      "publicReview": "The host was lovely and the loft was spotless.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 6,
+      "listingName": "Downtown Loft Paris",
+      "guestName": "Carlos",
+      "status": "published",
+      "submittedAt": "2025-06-22",
+      "publicReview": "Nice place but smaller than expected.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 3 }
+      ]
+    },
+    {
+      "id": 7,
+      "listingName": "Mountain Retreat Zurich",
+      "guestName": "Noah",
+      "status": "pending",
+      "submittedAt": "2025-10-05",
+      "publicReview": "Peaceful stay with breathtaking views.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 8,
+      "listingName": "Mountain Retreat Zurich",
+      "guestName": "Sophia",
+      "status": "pending",
+      "submittedAt": "2025-09-15",
+      "publicReview": "A cozy cabin perfect for families.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 9,
+      "listingName": "City Center Studio Rome",
+      "guestName": "Oliver",
+      "status": "pending",
+      "submittedAt": "2025-08-12",
+      "publicReview": "Compact but perfect for a solo traveler.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 10,
+      "listingName": "City Center Studio Rome",
+      "guestName": "Isabella",
+      "status": "published",
+      "submittedAt": "2025-07-25",
+      "publicReview": "Amazing location, a bit noisy at night.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 3 }
+      ]
+    },
+    {
+      "id": 11,
+      "listingName": "Seaside Cottage Lisbon",
+      "guestName": "Liam",
+      "status": "published",
+      "submittedAt": "2025-10-02",
+      "publicReview": "Cozy little cottage with great views.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 12,
+      "listingName": "Seaside Cottage Lisbon",
+      "guestName": "Mila",
+      "status": "pending",
+      "submittedAt": "2025-09-01",
+      "publicReview": "The sea breeze was amazing, we’ll be back!",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 13,
+      "listingName": "Downtown Penthouse Amsterdam",
+      "guestName": "Ethan",
+      "status": "pending",
+      "submittedAt": "2025-09-11",
+      "publicReview": "Luxury stay, stunning views, great host.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 14,
+      "listingName": "Downtown Penthouse Amsterdam",
+      "guestName": "Zoe",
+      "status": "published",
+      "submittedAt": "2025-09-25",
+      "publicReview": "A bit pricey but totally worth it.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 15,
+      "listingName": "Lakeview Cabin Helsinki",
+      "guestName": "William",
+      "status": "pending",
+      "submittedAt": "2025-08-01",
+      "publicReview": "Quiet, comfortable, perfect for nature lovers.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 16,
+      "listingName": "Lakeview Cabin Helsinki",
+      "guestName": "Ava",
+      "status": "pending",
+      "submittedAt": "2025-08-22",
+      "publicReview": "We enjoyed the sauna and the lake view!",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 17,
+      "listingName": "Riverside Loft Prague",
+      "guestName": "Lucas",
+      "status": "pending",
+      "submittedAt": "2025-10-03",
+      "publicReview": "Modern and spacious, near the old town.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    },
+    {
+      "id": 18,
+      "listingName": "Riverside Loft Prague",
+      "guestName": "Ella",
+      "status": "published",
+      "submittedAt": "2025-09-15",
+      "publicReview": "Beautiful place but hard to find parking.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 4 },
+        { "name": "Value", "rating": 3 }
+      ]
+    },
+    {
+      "id": 19,
+      "listingName": "Old Town Apartment Vienna",
+      "guestName": "James",
+      "status": "pending",
+      "submittedAt": "2025-09-05",
+      "publicReview": "Classic style with modern comfort.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 5 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 4 }
+      ]
+    },
+    {
+      "id": 20,
+      "listingName": "Old Town Apartment Vienna",
+      "guestName": "Charlotte",
+      "status": "published",
+      "submittedAt": "2025-08-18",
+      "publicReview": "Great for couples, walkable location.",
+      "reviewCategory": [
+        { "name": "Cleanliness", "rating": 4 },
+        { "name": "Communication", "rating": 5 },
+        { "name": "Value", "rating": 5 }
+      ]
+    }
+  ]
+}
