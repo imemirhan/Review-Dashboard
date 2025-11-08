@@ -1,5 +1,6 @@
 'use client';
 
+import PublicLayout from "@/components/PublicLayout";
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Star, ArrowLeft, Images, X } from 'lucide-react';
@@ -59,6 +60,7 @@ export default function PropertyPage() {
   };
 
   return (
+    <PublicLayout>
     <main className="bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto p-8">
         {/* Back Button */}
@@ -84,7 +86,7 @@ export default function PropertyPage() {
             </div>
             {avgRating > 0 && (
               <div className="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 shadow">
-                {avgRating.toFixed(2)} <Star size={12} className="fill-white" />
+                {avgRating.toFixed(1)} <Star size={12} className="fill-white" />
               </div>
             )}
           </div>
@@ -153,13 +155,13 @@ export default function PropertyPage() {
         </section>
 
         {/* Reviews Section */}
-        <section className="max-w-4xl mx-auto">
+        <section className="max-w-4xl">
         <h2 className="text-2xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
             Reviews
             {avgRating > 0 && (
             <>
                 <Star className="text-yellow-500 fill-yellow-500" size={18} />
-                <span className="text-lg font-semibold">{avgRating.toFixed(2)}</span>
+                <span className="text-lg font-semibold">{avgRating.toFixed(1)}</span>
                 <span className="text-gray-600 text-sm font-normal">
                 ({reviews.length})
                 </span>
@@ -202,5 +204,6 @@ export default function PropertyPage() {
         </div>
       )}
     </main>
+    </PublicLayout>
   );
 }

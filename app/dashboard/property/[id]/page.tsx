@@ -1,9 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Star, CheckCircle, XCircle } from 'lucide-react';
 import useAdminAuth from '@/hooks/useAdminAuth';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 type Review = {
   id: number;
@@ -33,6 +42,7 @@ export default function DashboardPropertyPage() {
       });
   }, [listingName]);
 
+  // Toggle approval for a review
   const handleToggle = async (id: number) => {
     const updated = reviews.map((r) =>
       r.id === id ? { ...r, approved: !r.approved } : r
@@ -47,6 +57,7 @@ export default function DashboardPropertyPage() {
     });
   };
 
+  // Save all changes
   const handleSave = async () => {
     setIsSaving(true);
     await fetch('/api/reviews/hostaway', {
@@ -59,6 +70,26 @@ export default function DashboardPropertyPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  // ✅ Monthly average ratings data
+  const monthlyRatings = useMemo(() => {
+    const grouped: Record<string, number[]> = {};
+    reviews
+      .filter((r) => r.approved)
+      .forEach((r) => {
+        const d = new Date(r.date.replace(' ', 'T'));
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(r.rating);
+      });
+
+    return Object.entries(grouped)
+      .map(([month, values]) => ({
+        month,
+        avgRating: values.reduce((a, b) => a + b, 0) / values.length,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [reviews]);
+
   return (
     <main className="p-8 bg-[#f8f8f8] min-h-screen">
       {/* Back Button */}
@@ -70,26 +101,66 @@ export default function DashboardPropertyPage() {
       </button>
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{listingName}</h1>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className={`px-4 py-2 rounded-md text-white font-semibold shadow-sm transition ${
-            isSaving
-              ? 'bg-gray-400'
-              : 'bg-[#164f4c] hover:bg-[#0f3a38]'
-          }`}
-        >
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
 
-      {saved && (
-        <p className="text-green-600 text-sm mb-4 font-medium">
-          ✅ Changes saved successfully!
-        </p>
-      )}
+        <a
+            href={`/property/${encodeURIComponent(listingName)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#164f4c] hover:underline text-sm font-medium"
+        >
+            Go to property page →
+        </a>
+        </div>
+
+
+      {/* Performance Chart */}
+      <div className="bg-white border rounded-xl shadow-sm p-6 mb-10">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          Performance Overview
+        </h2>
+        {monthlyRatings.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={monthlyRatings}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 12 }}
+                stroke="#6b7280"
+                tickFormatter={(m) => {
+                  const [y, mo] = m.split('-');
+                  return new Date(Number(y), Number(mo) - 1).toLocaleString('default', {
+                    month: 'short',
+                    year: '2-digit',
+                  });
+                }}
+              />
+              <YAxis domain={[0, 5]} tick={{ fontSize: 12 }} stroke="#6b7280" />
+              <Tooltip
+                formatter={(value: number) => value.toFixed(1)}
+                labelFormatter={(m) =>
+                  new Date(m + '-01').toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                }
+              />
+              <Line
+                type="monotone"
+                dataKey="avgRating"
+                stroke="#164f4c"
+                strokeWidth={2.5}
+                dot={{ r: 5, fill: '#164f4c' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-gray-500 text-sm italic">
+            Not enough approved reviews to display performance data.
+          </p>
+        )}
+      </div>
 
       {/* Reviews Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LayoutDashboard, MessageSquare, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, LogOut, User } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function AdminSidebar() {
@@ -29,10 +29,14 @@ export default function AdminSidebar() {
     >
       <div className="p-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
-            <Shield size={18} />
-          </div>
-          <span className="font-semibold text-lg">Manager</span>
+        <div className="w-9 h-9 rounded-full overflow-hidden bg-white/15 flex items-center justify-center">
+            <img
+            src="/flex.jpeg"
+            alt="Manager Logo"
+            className="w-full h-full object-cover"
+            />
+        </div>
+        <span className="font-semibold text-lg">Manager</span>
         </Link>
 
         <nav className="mt-6 space-y-1">
@@ -54,11 +58,13 @@ export default function AdminSidebar() {
 
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-white/20" />
-          <div>
-            <p className="text-sm font-medium">Admin</p>
-            <p className="text-xs text-white/70">Administrator</p>
-          </div>
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <User size={16} className="text-white/90" />
+            </div>
+            <div>
+                <p className="text-sm font-medium text-white">Admin</p>
+                <p className="text-xs text-white/70">Administrator</p>
+            </div>
         </div>
 
         <button

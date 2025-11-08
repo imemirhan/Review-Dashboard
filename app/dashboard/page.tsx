@@ -61,7 +61,7 @@ export default function DashboardPage() {
   const kpis = useMemo(() => {
     const approved = reviews.filter((r) => r.approved);
     const avgRating = approved.length
-      ? (approved.reduce((a, b) => a + b.rating, 0) / approved.length).toFixed(2)
+      ? (approved.reduce((a, b) => a + b.rating, 0) / approved.length).toFixed(1)
       : '—';
     const totalReviews = reviews.length;
     const approvalRate = totalReviews
@@ -86,7 +86,7 @@ export default function DashboardPage() {
 
   return months.map((m) => ({
     month: m,
-    avgRating: byMonth[m] ? +(byMonth[m].total / byMonth[m].count).toFixed(2) : 0,
+    avgRating: byMonth[m] ? +(byMonth[m].total / byMonth[m].count).toFixed(1) : 0,
   }));
 }, [reviews]);
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-1">
                     <Star size={16} className="text-yellow-500 fill-yellow-500" />
                     <span className="text-sm font-medium">
-                        {p.approvedCount > 0 ? p.avgRating.toFixed(2) : '—'}
+                        {p.approvedCount > 0 ? p.avgRating.toFixed(1) : '—'}
                     </span>
                     </div>
                 </div>
@@ -191,6 +191,7 @@ export default function DashboardPage() {
 
                 <div className="flex items-center gap-4 mt-4">
                     <Link
+                    target="_blank"
                     href={`/property/${encodeURIComponent(p.listing)}`}
                     className="text-sm font-medium hover:underline"
                     style={{ color: '#164f4c' }}
