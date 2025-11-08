@@ -39,3 +39,29 @@ export type ReviewCardProps = {
   date: string;
   categories?: ReviewCategory[];
 };
+
+export type HostawayReview = {
+  id: number;
+  listingName: string;
+  guestName: string;
+  publicReview: string;
+  reviewCategory?: { name: string; rating: number }[];
+  submittedAt?: string;
+  departureDate?: string;
+  status?: string;
+  channelId?: number;
+  type?: string;
+};
+
+export type NormalizedReview = {
+  id: number;
+  listing: string;
+  guest: string;
+  rating: number | null;
+  categories: { name: string; rating: number }[];
+  review: string;
+  date: string;
+  approved: boolean;
+  type: string;
+  channelId: number | null;
+};

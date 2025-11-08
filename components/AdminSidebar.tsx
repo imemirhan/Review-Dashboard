@@ -15,10 +15,8 @@ export default function AdminSidebar() {
 
   const active = (href: string) => {
     if (href === '/dashboard') {
-        // Exact match only for the dashboard root
         return pathname === '/dashboard' ? 'bg-white/10' : 'hover:bg-white/10';
     }
-    // For other routes, allow nested match
     return pathname?.startsWith(href) ? 'bg-white/10' : 'hover:bg-white/10';
   };
 

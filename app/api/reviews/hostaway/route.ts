@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
+import { HostawayReview, NormalizedReview } from '@/lib/types';
 import mockData from '@/data/mockReviews.json';
 
-let persistedReviews: Record<number, boolean> = {};
 let cachedToken: string | null = null;
+let persistedReviews: Record<number, boolean> = {};
+let cachedReviews: NormalizedReview[] | null = null;
 let tokenExpiry = 0;
-let cachedReviews: any[] | null = null;
 let reviewsExpiry = 0;
 
 const HOSTAWAY_CLIENT_ID = process.env.HOSTAWAY_CLIENT_ID!;
@@ -12,78 +13,74 @@ const HOSTAWAY_CLIENT_SECRET = process.env.HOSTAWAY_CLIENT_SECRET!;
 const HOSTAWAY_BASE_URL = process.env.HOSTAWAY_BASE_URL || 'https://api.hostaway.com/v1';
 
 if (!HOSTAWAY_CLIENT_ID || !HOSTAWAY_CLIENT_SECRET) {
-  throw new Error('❌ Missing Hostaway credentials in environment variables');
+  throw new Error('Missing Hostaway credentials in environment variables');
 }
 
-/** 
- * cache access token using Hostaway's `expires_in` TTL 
- */
-async function getAccessToken() {
+async function getAccessToken(retry = 1): Promise<string> {
   const now = Date.now();
 
-  // Use cached token if not expired
   if (cachedToken && now < tokenExpiry) return cachedToken;
 
-  const body = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: HOSTAWAY_CLIENT_ID,
-    client_secret: HOSTAWAY_CLIENT_SECRET,
-    scope: 'general',
-  });
+  try {
+    const body = new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: HOSTAWAY_CLIENT_ID,
+      client_secret: HOSTAWAY_CLIENT_SECRET,
+      scope: 'general',
+    });
 
-  const res = await fetch(`${HOSTAWAY_BASE_URL}/accessTokens`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Cache-Control': 'no-cache',
-    },
-    body,
-  });
+    const res = await fetch(`${HOSTAWAY_BASE_URL}/accessTokens`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
 
-  if (!res.ok) throw new Error('Failed to obtain Hostaway token');
-  const data = await res.json();
+    if (!res.ok) throw new Error(`Token fetch failed: ${res.statusText}`);
+    const data = await res.json();
+    const token = String(data.access_token);
 
-  // Cache token & expiry (subtract 1 min buffer)
-  cachedToken = data.access_token;
-  tokenExpiry = now + (data.expires_in - 60) * 1000;
-  console.log(`Cached new Hostaway token, valid for ${data.expires_in}s`);
-  return cachedToken;
+    cachedToken = token;
+    tokenExpiry = now + (Number(data.expires_in) - 60) * 1000;
+    return token;
+  } catch (err) {
+    if (retry > 0) return getAccessToken(retry - 1);
+    console.error('Hostaway token fetch failed after retry:', err);
+    throw err;
+  }
 }
 
-/** 
- * Normalize Hostaway data for frontend 
- */
-function normalizeReviews(data: any[]) {
-  return data.map((r) => ({
-    id: r.id,
-    listing: r.listingName,
-    guest: r.guestName,
-    rating:
-      r.reviewCategory?.length > 0
-        ? Math.round(
-            (r.reviewCategory.reduce((a: any, b: { rating: number }) => a + b.rating, 0) /
-              r.reviewCategory.length) * 10
-          ) / 10
-        : null,
-    categories: r.reviewCategory || [],
-    review: r.publicReview || '',
-    date: r.submittedAt || r.departureDate || '',
-    approved: persistedReviews[r.id] ?? (r.status === 'published'),
-    type: r.type || "host-to-guest",
-    channelId: r.channelId,
-  }));
+function normalizeReviews(data: HostawayReview[]): NormalizedReview[] {
+  return data.map((r) => {
+    const categories = r.reviewCategory || [];
+    const rating =
+      categories.length > 0
+        ? +(categories.reduce((a, b) => a + b.rating, 0) / categories.length).toFixed(1)
+        : null;
+
+    return {
+      id: r.id,
+      listing: r.listingName,
+      guest: r.guestName,
+      rating,
+      categories,
+      review: r.publicReview || '',
+      date: r.submittedAt || r.departureDate || '',
+      approved: persistedReviews[r.id] ?? (r.status === 'published'),
+      type: r.type || 'host-to-guest',
+      channelId: r.channelId ?? null,
+    };
+  });
 }
 
-/**
- * GET: Fetch and cache reviews (5-minute cache)
- */
+//Get 
 export async function GET() {
   const now = Date.now();
 
-  // Use cached data if recent
+  // Serve cached reviews if still valid
   if (cachedReviews && now < reviewsExpiry) {
     return NextResponse.json({
       source: 'cache',
+      cachedAt: new Date(reviewsExpiry - 5 * 60 * 1000).toISOString(),
       success: true,
       data: cachedReviews,
     });
@@ -92,19 +89,17 @@ export async function GET() {
   try {
     const token = await getAccessToken();
     const res = await fetch(`${HOSTAWAY_BASE_URL}/reviews?limit=20`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Cache-Control': 'no-cache',
-      },
+      headers: { Authorization: `Bearer ${token}`, 'Cache-Control': 'no-cache' },
     });
 
-    if (!res.ok) throw new Error('Hostaway reviews API failed');
+    if (!res.ok) throw new Error(`Hostaway API failed with status ${res.status}`);
+
     const data = await res.json();
     const reviews = data.result?.length ? data.result : mockData.result;
 
     const normalized = normalizeReviews(reviews);
     cachedReviews = normalized;
-    reviewsExpiry = now + 5 * 60 * 1000; // Cache for 5 minutes
+    reviewsExpiry = now + 5 * 60 * 1000;
 
     return NextResponse.json({
       source: 'hostaway',
@@ -112,32 +107,42 @@ export async function GET() {
       data: normalized,
     });
   } catch (err) {
-    console.warn('⚠️ Hostaway unavailable, using mock data:', err);
+    console.warn('Hostaway unavailable, falling back to mock data:', err);
+
     const normalized = normalizeReviews(mockData.result);
     cachedReviews = normalized;
     reviewsExpiry = now + 5 * 60 * 1000;
+
+    const source = process.env.NODE_ENV === 'development' ? 'mock' : 'fallback';
     return NextResponse.json({
-      source: 'mock',
+      source,
       success: true,
       data: normalized,
     });
   }
 }
 
-/**
- * POST: Persist approval changes locally
- */
+//Post
 export async function POST(req: Request) {
-  const updates = await req.json();
+  try {
+    const updates = await req.json();
+    const updateArray = Array.isArray(updates) ? updates : [updates];
 
-  if (Array.isArray(updates)) {
-    updates.forEach((u) => (persistedReviews[u.id] = u.approved));
-  } else {
-    persistedReviews[updates.id] = updates.approved;
+    updateArray.forEach((u) => {
+      if (typeof u.id === 'number' && typeof u.approved === 'boolean') {
+        persistedReviews[u.id] = u.approved;
+      }
+    });
+
+    // Invalidate cache so new approval states reflect on next GET
+    cachedReviews = null;
+
+    return NextResponse.json({ success: true, updated: persistedReviews });
+  } catch (err) {
+    console.error('Failed to process POST /reviews:', err);
+    return NextResponse.json(
+      { success: false, error: 'Invalid request payload' },
+      { status: 400 }
+    );
   }
-
-  // Invalidate cache to reflect new approval states
-  cachedReviews = null;
-
-  return NextResponse.json({ success: true, updated: persistedReviews });
 }
