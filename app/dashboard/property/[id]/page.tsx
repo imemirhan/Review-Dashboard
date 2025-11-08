@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Star, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import useAdminAuth from '@/hooks/useAdminAuth';
+import ManagerReviewCard from '@/components/ManagerReviewCard';
+import { Review } from '@/lib/types';
 import {
   LineChart,
   Line,
@@ -14,16 +16,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-type Review = {
-  id: number;
-  listing: string;
-  guest: string;
-  rating: number;
-  review: string;
-  date: string;
-  approved: boolean;
-};
-
 export default function DashboardPropertyPage() {
   useAdminAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -33,12 +25,15 @@ export default function DashboardPropertyPage() {
   const router = useRouter();
   const listingName = decodeURIComponent(params.id as string);
 
-  // Fetch reviews for this listing
+  // Fetch reviews for this property
   useEffect(() => {
     fetch('/api/reviews/hostaway')
       .then((res) => res.json())
       .then((data) => {
-        setReviews(data.data.filter((r: Review) => r.listing === listingName));
+        const propertyReviews = data.data.filter(
+          (r: Review) => r.listing === listingName
+        );
+        setReviews(propertyReviews);
       });
   }, [listingName]);
 
@@ -70,7 +65,7 @@ export default function DashboardPropertyPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // ✅ Monthly average ratings data
+  // Monthly average ratings data
   const monthlyRatings = useMemo(() => {
     const grouped: Record<string, number[]> = {};
     reviews
@@ -101,19 +96,18 @@ export default function DashboardPropertyPage() {
       </button>
 
       {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{listingName}</h1>
 
         <a
-            href={`/property/${encodeURIComponent(listingName)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#164f4c] hover:underline text-sm font-medium"
+          href={`/property/${encodeURIComponent(listingName)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#164f4c] hover:underline text-sm font-medium"
         >
-            Go to property page →
+          Go to property page →
         </a>
-        </div>
-
+      </div>
 
       {/* Performance Chart */}
       <div className="bg-white border rounded-xl shadow-sm p-6 mb-10">
@@ -165,46 +159,11 @@ export default function DashboardPropertyPage() {
       {/* Reviews Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {reviews.map((r) => (
-          <div
+          <ManagerReviewCard
             key={r.id}
-            className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-gray-800">{r.guest}</h3>
-                <p className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString()}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-medium">{r.rating.toFixed(1)}</span>
-              </div>
-            </div>
-
-            <p className="text-gray-700 text-sm mt-3 line-clamp-4 italic">
-              “{r.review}”
-            </p>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => handleToggle(r.id)}
-                className={`flex items-center gap-1 font-medium border rounded-full px-3 py-1 transition-all ${
-                  r.approved
-                    ? 'text-green-700 border-green-400 hover:bg-green-50'
-                    : 'text-red-600 border-red-300 hover:bg-red-50'
-                }`}
-              >
-                {r.approved ? (
-                  <>
-                    <CheckCircle size={12} /> Approved
-                  </>
-                ) : (
-                  <>
-                    <XCircle size={12} /> Pending
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+            review={r}
+            onToggleApproval={handleToggle}
+          />
         ))}
       </div>
 

@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Star, CheckCircle, XCircle } from 'lucide-react';
+import { Star, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import useAdminAuth from '@/hooks/useAdminAuth';
+import ManagerReviewCard from '@/components/ManagerReviewCard';
 
 type Review = {
   id: number;
@@ -23,6 +24,7 @@ export default function ReviewsPage() {
   const [beforeDate, setBeforeDate] = useState('');
   const [minRating, setMinRating] = useState(0);
   const [maxRating, setMaxRating] = useState(5);
+  const [ratingCategory, setRatingCategory] = useState<'overall' | 'Cleanliness' | 'Communication' | 'Value'>('overall');
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending'>('all');
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -41,19 +43,37 @@ export default function ReviewsPage() {
       .filter((r) => {
         const t = new Date(r.date).getTime();
         const inDateRange = t >= after && t <= before;
-        const inRatingRange = r.rating >= minRating && r.rating <= maxRating;
+
+        let categoryRating = r.rating;
+        if (ratingCategory !== 'overall' && Array.isArray((r as any).categories)) {
+          const cat = (r as any).categories.find((c: any) => c.name === ratingCategory);
+          categoryRating = cat ? cat.rating : 0;
+        }
+
+        const meetsRating = categoryRating >= minRating;
         const inStatus =
           statusFilter === 'all' ||
           (statusFilter === 'approved' && r.approved) ||
           (statusFilter === 'pending' && !r.approved);
-        return inDateRange && inRatingRange && inStatus;
+
+        return inDateRange && meetsRating && inStatus;
       })
       .sort((a, b) => {
         const da = new Date(a.date).getTime();
         const db = new Date(b.date).getTime();
         return sortOrder === 'newest' ? db - da : da - db;
       });
-  }, [reviews, sortOrder, afterDate, beforeDate, minRating, maxRating, statusFilter]);
+  }, [reviews, sortOrder, afterDate, beforeDate, minRating, statusFilter, ratingCategory]);
+
+  const handleClearFilters = () => {
+    setSortOrder('newest');
+    setAfterDate('');
+    setBeforeDate('');
+    setMinRating(0);
+    setMaxRating(5);
+    setRatingCategory('overall');
+    setStatusFilter('all');
+  };
 
   const handleApproveAll = async () => {
     const pending = reviews.filter((r) => !r.approved);
@@ -87,37 +107,11 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md text-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              Approve All Pending Reviews?
-            </h2>
-            <p className="text-sm text-gray-600 mb-5">
-              This will mark all pending reviews as approved. Are you sure you want to continue?
-            </p>
-
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={handleApproveAll}
-                className="bg-[#164f4c] text-white px-4 py-2 rounded-md hover:bg-[#0f3a38] transition font-medium"
-              >
-                Yes, Approve All
-              </button>
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 transition font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Header + Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      {/* Filters + Header */}
+      <div
+        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4
+                    bg-[#f8f8f8] fixed top-0 left-[250px] right-0 z-40 py-3 px-4 border-b border-gray-200 shadow-sm"
+      >
         <div className="flex items-center justify-between w-full lg:w-auto">
           <h1 className="text-2xl font-bold" style={{ color: '#164f4c' }}>
             Reviews
@@ -166,7 +160,7 @@ export default function ReviewsPage() {
             />
           </div>
 
-          {/* Rating Filters */}
+          {/* Rating Filter */}
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600 font-medium">Rating</label>
             <input
@@ -178,16 +172,19 @@ export default function ReviewsPage() {
               onChange={(e) => setMinRating(parseFloat(e.target.value) || 0)}
               className="border rounded-md px-2 py-1 w-16 text-sm focus:ring-2 focus:ring-[#164f4c]/40"
             />
-            <span className="text-gray-500">-</span>
-            <input
-              type="number"
-              min="0"
-              max="5"
-              step="0.1"
-              value={maxRating}
-              onChange={(e) => setMaxRating(parseFloat(e.target.value) || 5)}
-              className="border rounded-md px-2 py-1 w-16 text-sm focus:ring-2 focus:ring-[#164f4c]/40"
-            />
+
+            <select
+              value={ratingCategory}
+              onChange={(e) =>
+                setRatingCategory(e.target.value as 'overall' | 'Cleanliness' | 'Communication' | 'Value')
+              }
+              className="border rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-[#164f4c]/40"
+            >
+              <option value="overall">Overall</option>
+              <option value="Cleanliness">Cleanliness</option>
+              <option value="Communication">Communication</option>
+              <option value="Value">Value</option>
+            </select>
           </div>
 
           {/* Status Filter */}
@@ -200,62 +197,21 @@ export default function ReviewsPage() {
             <option value="approved">Approved Only</option>
             <option value="pending">Pending Only</option>
           </select>
+
+         {/* Clear Filters Button */}
+        <button
+        onClick={handleClearFilters}
+        className="flex items-center gap-1 text-sm bg-[#164f4c] text-white px-3 py-1.5 rounded-md hover:bg-[#0f3a38] transition"
+        >
+        <RefreshCw size={14} className="text-white" /> Clear
+        </button>
         </div>
       </div>
 
       {/* Reviews Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((r) => (
-          <div
-            key={r.id}
-            className="bg-white border rounded-xl shadow-sm p-5 hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-gray-800">{r.guest}</h3>
-                <p className="text-xs text-gray-500">
-                  {r.listing}{' '}
-                  <a
-                    href={`/property/${encodeURIComponent(r.listing)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#164f4c] hover:underline font-medium"
-                  >
-                    See property →
-                  </a>
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-medium">{r.rating.toFixed(1)}</span>
-              </div>
-            </div>
-
-            <p className="text-gray-700 text-sm mt-2 line-clamp-4">“{r.review}”</p>
-
-            <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
-              <span>{new Date(r.date).toLocaleDateString()}</span>
-
-              <button
-                onClick={() => toggleApproval(r.id)}
-                className={`flex items-center gap-1 font-medium border rounded-full px-3 py-1 transition-all ${
-                  r.approved
-                    ? 'text-green-700 border-green-400 hover:bg-green-50'
-                    : 'text-red-600 border-red-300 hover:bg-red-50'
-                }`}
-              >
-                {r.approved ? (
-                  <>
-                    <CheckCircle size={12} /> Approved
-                  </>
-                ) : (
-                  <>
-                    <XCircle size={12} /> Pending
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          <ManagerReviewCard key={r.id} review={r} onToggleApproval={toggleApproval} />
         ))}
       </div>
 

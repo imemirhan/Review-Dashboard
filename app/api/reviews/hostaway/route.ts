@@ -7,10 +7,13 @@ let tokenExpiry = 0;
 let cachedReviews: any[] | null = null;
 let reviewsExpiry = 0;
 
-const HOSTAWAY_CLIENT_ID = '61148';
-const HOSTAWAY_CLIENT_SECRET =
-  'f94377ebbbb479490bb3ec364649168dc443dda2e4830facaf5de2e74ccc9152';
-const HOSTAWAY_BASE_URL = 'https://api.hostaway.com/v1';
+const HOSTAWAY_CLIENT_ID = process.env.HOSTAWAY_CLIENT_ID!;
+const HOSTAWAY_CLIENT_SECRET = process.env.HOSTAWAY_CLIENT_SECRET!;
+const HOSTAWAY_BASE_URL = process.env.HOSTAWAY_BASE_URL || 'https://api.hostaway.com/v1';
+
+if (!HOSTAWAY_CLIENT_ID || !HOSTAWAY_CLIENT_SECRET) {
+  throw new Error('❌ Missing Hostaway credentials in environment variables');
+}
 
 /** 
  * cache access token using Hostaway's `expires_in` TTL 

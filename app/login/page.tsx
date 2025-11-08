@@ -66,7 +66,7 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className="w-full text-white font-semibold py-2 rounded-md"
-            style={{ background: '#164f4c' }}
+            style={{ background: '#164f4c', cursor: 'pointer' }}
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>

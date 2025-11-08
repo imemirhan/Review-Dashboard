@@ -62,7 +62,7 @@ export default function AdminSidebar() {
                 <User size={16} className="text-white/90" />
             </div>
             <div>
-                <p className="text-sm font-medium text-white">Admin</p>
+                <p className="text-sm font-medium text-white">Welcome, Admin!</p>
                 <p className="text-xs text-white/70">Administrator</p>
             </div>
         </div>
