@@ -1,131 +1,120 @@
-Property Review Management System
+# Property Review Management System
 
 A Next.js 14 + TypeScript web application for managing and visualizing property reviews.
-It integrates with the Hostaway API, provides both public-facing property pages and a manager dashboard with review analytics, approval controls, and trend visualization.
 
-Features
-🔹 Public Interface
+It integrates with the Hostaway API, providing both public-facing property pages and a manager dashboard with review analytics, approval controls, and trend visualization.
 
-Displays each property with photo gallery and detailed description.
+---
 
-Lists approved guest reviews and average ratings by category.
+## Features
 
-Shows dynamic photo galleries using picsum.photos placeholder images.
+### Public Interface
+- Displays each property with a photo gallery and detailed description.
+- Lists approved guest reviews and average ratings by category.
+- Shows dynamic photo galleries using picsum.photos placeholder images.
 
-🔹 Admin Dashboard
+### Admin Dashboard
+- Secure admin view for reviewing and approving guest reviews (username: admin, password: admin).
+- KPI cards for average rating, approval rate, and total reviews.
+- Interactive monthly rating trend chart using Recharts.
+- Property-level statistics and category averages.
+- Integrated caching and offline mock data fallback.
 
-Secure admin view for reviewing and approving guest reviews. (username: admin, password: admin)
+### API Integration
+- Connected to the Hostaway API for real review data.
+- Falls back to local mock JSON data if the API is unavailable.
+- Implements access token caching and 5-minute review caching.
 
-KPI cards (average rating, approval rate, total reviews).
+---
 
-Interactive monthly rating trend chart using Recharts.
+## Tech Stack
 
-Property-level statistics and category averages.
+| Category | Technology |
+|-----------|-------------|
+| Frontend | Next.js 14 (App Router), React 18, TypeScript |
+| Styling | Tailwind CSS, Lucide React Icons |
+| Charts | Recharts |
+| Backend / API | Next.js API Routes |
+| Data Source | Hostaway API + Local mock data |
+| Utilities | In-memory caching, JSON normalization |
+| Deployment | Vercel |
 
-Integrated caching and offline mock data fallback.
+---
 
-🔹 API Integration
+## Setup & Installation
 
-Connected to Hostaway API for real review data.
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/property-review-management.git
+   cd property-review-management
+   ```
+Install dependencies:
 
-Falls back to local mock JSON data if the API is unavailable.
-
-Implements access token caching and 5-minute review caching.
-
-🧠 Tech Stack
-Category	Technology
-Frontend	Next.js 14 (App Router), React 18, TypeScript
-Styling	Tailwind CSS, Lucide React Icons
-Charts	Recharts
-Backend / API	Next.js API Routes
-Data Source	Hostaway API + Local mock data
-Utilities	In-memory caching, JSON normalization
-Deployment Ready	Vercel
-🗂️ Project Structure
-src/
-├── app/
-│   ├── api/
-│   │   └── reviews/
-│   │       └── hostaway/route.ts       # API integration & caching
-│   ├── dashboard/                      # Manager dashboard
-|   |   ├──property/
-|   |   └──reviews/
-│   ├── property/[id]/page.tsx          # Public property details page
-|   └── login/                          # Dashboard login
-├── components/
-│   ├── PropertyCard.tsx                # Reusable property display
-│   ├── ReviewCard.tsx                  # Guest review card
-│   ├── ManagerReviewCard.tsx           # Manager review control
-│   ├── RatingTrend.tsx                 # Line chart for analytics
-│   ├── StatCard.tsx                    # KPI cards
-│   └── PublicLayout.tsx                # Shared layout for public pages
-├── lib/
-│   ├── constants.ts                    # Global constants (e.g., image URL)
-│   ├── utils.ts                        # Helper functions
-│   └── types.ts                        # Shared TypeScript interfaces
-└── data/
-    └── mockReviews.json                # Fallback mock data
-
-Download project -> go to the root of the project
-
-'''
+```
 npm install
-'''
+```
+Create a .env.local file in the root directory and add:
 
-Create a .env.local file at the root and add your credentials:
-
+```
 HOSTAWAY_CLIENT_ID=your_client_id
 HOSTAWAY_CLIENT_SECRET=your_client_secret
 HOSTAWAY_BASE_URL=https://api.hostaway.com/v1
+```
 
-then
-'''
+Run the development server:
+
+```
 npm run dev
-'''
+```
+Then open http://localhost:3000
 
-then you can open http://localhost:3000
-
-🌐 API Endpoints
+API Endpoints
 GET /api/reviews/hostaway
-
 Fetches property reviews from Hostaway or mock data.
 
-Returns { success, source, data }
+Response example:
 
-Caches results for 5 minutes
+```
+{
+  "success": true,
+  "source": "hostaway | cache | mock",
+  "data": [...]
+}
+```
+
+Caches results for 5 minutes.
 
 POST /api/reviews/hostaway
-
 Updates approval status of reviews.
 
+Example:
+
+```
 [
   { "id": 123, "approved": true }
 ]
+```
+Stores approval states in-memory.
 
+Automatically invalidates cached data.
 
-In-memory persistence
+Key Design and Logic Decisions
+Componentization: Logic split into reusable UI components for clarity and scalability.
 
-Automatically invalidates cache
+Normalization: All Hostaway API data converted into a consistent internal structure.
 
-Key Design Decisions
+Caching Layer: Reduces redundant API calls and speeds up load times.
 
-Componentization: Separated logic into smaller, reusable UI blocks.
+Fallback Handling: If the Hostaway API fails, the app automatically uses mock JSON data.
 
-Normalization: All external API data converted into a unified structure.
+Type Safety: Strong TypeScript interfaces ensure reliability and maintainability.
 
-Caching Layer: Reduces redundant API requests and improves response speed.
+Future Improvements
+Persistent database for review approvals (e.g., PostgreSQL or Firebase).
 
-Fallback Handling: App gracefully switches to local data if hostaway api fails.
-
-Type Safety: Enforced across components and API using TypeScript interfaces.
-
-🧩 Future Improvements
-
-Persistent storage for review approvals (e.g., PostgreSQL or Firebase).
-
-Role-based authentication for admins.
+Role-based authentication for admin users.
 
 Integration with Google Reviews API for cross-platform insights.
 
-🧑‍💻 Author
+Author
 Emirhan Ataman
