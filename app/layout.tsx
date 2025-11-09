@@ -8,6 +8,9 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: "The Flex | Beautiful Stays",
   description: "Discover and review the world's best furnished apartments.",
+  icons: {
+    icon: '/flex.jpeg',
+  },
 };
 
 export default function PublicLayoutWrapper({
